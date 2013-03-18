@@ -1,3 +1,12 @@
+#'@title Pricing option using the finite difference method
+#'@desciption 
+#'\code{findiff} function is used to find the price of the option using the 
+#'finite difference method by taking the rate of return , standard deviation,
+#'the stock price,the time to maturity,the strike price
+#'@param r risk free rate of return
+#'@param sd standard deviation
+#'@param t time to maturity
+#'@param x strike price
 findiff<-function(r,sd,s,t,x){
   dy<-(log(100*s)-log(1/s))/200
   y1<-seq(log(1/s),log(2*s),dy)

@@ -1,3 +1,6 @@
+#'@title Simulation of the wiener process
+#'@param t the time period
+#'@param dt the time interval
 wiener<-function(t,dt){
   w<-0
   sq<-seq(0,t-dt,dt)
