@@ -1,4 +1,4 @@
-function(R, geometric = TRUE, weights = NULL, rf, h, ...)
+rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
 {
     x = checkData(R)
     columns = ncol(x)
@@ -7,11 +7,12 @@ function(R, geometric = TRUE, weights = NULL, rf, h, ...)
         if(geometric)
             Return.cumulative = cumprod(1+x)
         else Return.cumulative = 1 + cumsum(x)
-        REM = max(x*(1+rf)^(length(x)-c(1:length(x))))
-        result = 1 - x[length(x)]/REM
-    rollingDrawdown<-rollapply(x, width = h, FUN = REDD)
-    return(rollingDrawdown)
+        l = length(Return.cumulative)
+        REM = max(Return.cumulative*(1+rf)^(l-c(1:l)))
+        result = 1 - Return.cumulative[l]/REM
     }
+    rollingDrawdown<-apply.rolling(x, width = h, FUN = REDD,geometric=geometric)
+    return(rollingDrawdown)
 }
 
 
