@@ -1,7 +1,3 @@
-#'@title realized volatility
-#'@description
-#'\code{rv} is used to calculate the daily realized volatiliy of the returns calculated using 5 minute data
-#'@param x the xts time series
 rv<-function(x){
   rv<-NULL
   dates<-NULL
