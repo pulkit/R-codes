@@ -2,7 +2,15 @@ rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
 {
     x = checkData(R)
     columns = ncol(x)
+    rowx = nrow(x)
     columnnames = colnames(x)
+    rf = checkData(rf,quiet = FALSE)
+    rowr = nrow(rf)
+    if(rowr != 1 ){
+        if(rowr != rowx){
+            warning("The number of rows of the returns and the risk free rate do not match")
+        }
+    }
     REDD<-function(x,geometric){
         if(geometric)
             Return.cumulative = cumprod(1+x)
@@ -22,6 +30,7 @@ rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
     rolldrawdown = reclass(drawdown, x)
     return(rolldrawdown)
 }
+
 
 
 
