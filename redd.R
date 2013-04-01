@@ -1,10 +1,36 @@
+#'@title Calculate the Rolling Economic Drawdown
+#'
+#'@description
+#'\code{rollDrawdown} calculates the Rolling Economic Drawdown(REDD) for
+#' a return series.To calculate the rolling economic drawdown cumulative 
+#' return and rolling economic max is calculated for each point. The risk 
+#' free return(rf) and the lookback period(h) is taken as the input. 
+#'
+#'@param R an xts, vector, matrix, data frame, timeseries, or zoo object of asset return.
+#'@param weights portfolio weighting vector, default NULL
+#'@param geometric utilize geometric chaining (TRUE) or  simple/arithmetic chaining(FALSE)
+#'to aggregate returns, default is TRUE
+#'@param rf risk free rate can be vector such as government security rate of return
+#'@param h lookback period 
+#'@param \dots any other passthru variable
+#'@references Yang, Z. George and Zhong, Liang, Optimal Portfolio Strategy to 
+#'Control Maximum Drawdown - The Case of Risk Based Dynamic Asset Allocation (February 25, 2012)
+#' @export
 rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
 {
+  
+  # DESCRIPTION:
+  # calculates the Rolling Economic Drawdown(REDD) for
+  # a return series.To calculate the rolling economic drawdown cumulative 
+  # return and rolling economic max is calculated for each point. The risk 
+  # free return(rf) and the lookback period(h) is taken as the input.
+  
+  # FUNCTION:
     x = checkData(R)
     columns = ncol(x)
     rowx = nrow(x)
     columnnames = colnames(x)
-    rf = checkData(rf,quiet = FALSE)
+    rf = checkData(rf)
     rowr = nrow(rf)
     if(rowr != 1 ){
         if(rowr != rowx){
@@ -21,13 +47,13 @@ rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
     }
 
     for(column in 1:columns){
-        column.drawdown <- na.skip(x[,column],FUN = apply.rolling(x[,column],width = h, FUN = REDD, geometric = geometric), geometric = geometric)
+        column.drawdown <- apply.rolling(x[,column],width = h, FUN = REDD, geometric = geometric)
         if(column == 1)
             rolldrawdown = column.drawdown
-        else rolldrawdown = merger(rolldrawdown, column.drawdown) 
+        else rolldrawdown = merge(rolldrawdown, column.drawdown) 
     }
     colnames(rolldrawdown) = columnnames
-    rolldrawdown = reclass(drawdown, x)
+    rolldrawdown = reclass(rolldrawdown, x)
     return(rolldrawdown)
 }
 
