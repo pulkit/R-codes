@@ -11,8 +11,16 @@ rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
         REM = max(Return.cumulative*(1+rf)^(l-c(1:l)))
         result = 1 - Return.cumulative[l]/REM
     }
-    rollingDrawdown<-apply.rolling(x, width = h, FUN = REDD,geometric=geometric)
-    return(rollingDrawdown)
+
+    for(column in 1:columns){
+        column.drawdown <- na.skip(x[,column],FUN = apply.rolling(x[,column],width = h, FUN = REDD, geometric = geometric), geometric = geometric)
+        if(column == 1)
+            rolldrawdown = column.drawdown
+        else rolldrawdown = merger(rolldrawdown, column.drawdown) 
+    }
+    colnames(rolldrawdown) = columnnames
+    rolldrawdown = reclass(drawdown, x)
+    return(rolldrawdown)
 }
 
 
