@@ -1,3 +1,6 @@
+#'@title Probabilistic Sharpe Ratio
+#'@description
+#'
 ProbSharpeRatio<-
 function(R, Rf = 0, p = 0.95, weights = NULL, annualize = FALSE, ...){
     R = checkData(R)
@@ -27,7 +30,7 @@ function(R, Rf = 0, p = 0.95, weights = NULL, annualize = FALSE, ...){
         sd = StdDev(R)
         sk = skewness(R)
         kr = kurtosis(R)
-        PSR = qnorm(((sr - refSR)*(n-1)^(0.5))/(1-sr*sk+sr^2*(kr-1)/4)^(0.5))
+        PSR = pnorm(((sr - refSR)*(n-1)^(0.5))/(1-sr*sk+sr^2*(kr-1)/4)^(0.5))
         PSR
 }
 
@@ -39,4 +42,5 @@ mintrl <- function(R,Rf,p,refSR,...){
     MinTRL
 
 }
+
 }
