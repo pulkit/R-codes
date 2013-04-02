@@ -22,12 +22,21 @@ function(R, Rf = 0, p = 0.95, weights = NULL, annualize = FALSE, ...){
     }
 
     psr <- function (R,Rf,p,refSR,...){
-        xR = Return.excess(R, Rf)
         sr = srm(R, Rf, p,"StdDev")
         n = nrow(R)
         sd = StdDev(R)
         sk = skewness(R)
         kr = kurtosis(R)
-        PSR = pnorm(((sr - refSR)*(n-1)^(0.5))/(1-sr*sk+sr^2*(kr-1)/4)^(0.5))
+        PSR = qnorm(((sr - refSR)*(n-1)^(0.5))/(1-sr*sk+sr^2*(kr-1)/4)^(0.5))
+        PSR
+}
+
+mintrl <- function(R,Rf,p,refSR,...){
+    sk = skewness(R)
+    kr =kurtosis(R)
+    sr = srm(R, Rf, p, "StdDev")
+    MinTRL = 1 + (1 - sk*sr + ((kr-1)/4)*sr^2)*(qnorm(p)/(sr-refSR))^2
+    MinTRL
+
 }
 }
