@@ -79,6 +79,7 @@ chart.REDD<-function(R,rf,h, geometric = TRUE,legend.loc = NULL, colorset = (1:1
 
 
 
+
   
 
 
