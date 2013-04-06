@@ -25,11 +25,12 @@ function(R, Rf = 0, p = 0.95, weights = NULL, annualize = FALSE, ...){
     }
 
     psr <- function (R,Rf,p,refSR,...){
-        sr = srm(R, Rf, p,"StdDev")
-        n = nrow(R)
-        sd = StdDev(R)
-        sk = skewness(R)
-        kr = kurtosis(R)
+        x = checkData(R)
+        sr = srm(x, Rf, p,"StdDev")
+        n = nrow(x)
+        sd = StdDev(x)
+        sk = skewness(x)
+        kr = kurtosis(x)
         PSR = pnorm(((sr - refSR)*(n-1)^(0.5))/(1-sr*sk+sr^2*(kr-1)/4)^(0.5))
         PSR
 }
