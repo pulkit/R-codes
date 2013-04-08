@@ -23,26 +23,73 @@ TriplePenacle<-function(R,geometric = TRUE, weights = NULL,...)
 #          return(Return.cumulative)
 #}
 get_minq<-function(R){
-
-            mu = mean(x[,column, na.rm = TRUE)
-                sd = StdDev(x)
-                phi = ar(x)$ar
-
-
-
+    x = checkData(R)
+    mu = mean(x[,column, na.rm = TRUE)
+    sd = StdDev(x)
+    phi = ar(x)$ar
+    dp0 = x[1] 
+    confidence = 0.95
+    q = 0
+    bets = 0
+    while(q < 0){
+        bets = bets + 1
+        q = getQ(bets, phi, mu, sigma, dp0, confidence)
+    minQ = golden_section(x,0,bets)
+    return minQ
 }
+
+
+getQ<-function(bets,phi,mu,sigma,dp0,confidence){
+    mean = ((phi^(bets+1)-phi)/(1-phi))*(dp0-mu)+mu*bets
+    var = ((sigma/(phi-1))^2)*(((phi^(2*(bets+1))-1)/(phi^2-1))-2*((phi^(bets+1)-1)/(phi-1))+bets +1)
+    q = mean + qnorm(confidence)*var^0.5
+    return(q)
+}
+
 
 get_TuW<-function(){
-            mu = mean(x[,column, na.rm = TRUE)
-                sd = StdDev(x)
-                phi = ar(x)$ar
-
-
-
+    mu = mean(x[,column, na.rm = TRUE)
+    sd = StdDev(x)
+    phi = ar(x)$ar
 }
-golden_search_method<-function(){
+golden_section<-function(R,a,b,minimum = TRUE,...){
+    tol = 10^-9
+    sign = 1 
+    if(minimum){
+        sign = -1
+    }
+    N = round(ceiling(-2.078087*log(tol/abs(b-a))))
+    r = 0.618033989
+    c = 1.0 - r
+    x1 = r*a + c*b
+    x2 = c*a + r*b
+    f1 = sign * getQ(x1,phi,mu,sigma,dp0,confidence)
+    f2 = sign * getQ(x2,phi,mu,sigma,dp0,confidence)
+    for(i in 1:N){
+        if(f1>f2){
+            a = x1
+            x1 = x2
+            f1 = f2
+            x2 = c*a+r*b
+            f2 = sign*(x2,phi,mu,sigma,dp0,confidence)
+        }
+        else{
+            b = x2
+            x2 = x1
+            x1 = r*a + c*b
+            f1 = sign*(x1,phi,mu,sigma,dp0,confidence)
+    }
+    }
+    if(f1<f2){
+        return(sign*f1)
+    }
+    else{
+        return(sign*f2)
+    }
+}   
+        
 
-}
+
 
 charts.TriplePenacle<-function(){
 }
