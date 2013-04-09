@@ -1,4 +1,22 @@
-TriplePenacle<-function(R,geometric = TRUE, weights = NULL,...)
+#' @title
+#' Triple Penance Rule
+#'
+#' @description
+#' \code{TriplePenance} calculates the Maximum drawdown and the maximum 
+#' Time under water for a particular confidence interval. These concepts 
+#' are intenately related through the "triple penance" rule which states 
+#' that under standard portfolio theory assumptions, it takes three times
+#' longer to recover from the expected maximum drawdown than the time it 
+#' takes to produce it, with the same confidence level. The framework is
+#' generalized to deal with the case of first-order auto-correlated cashflows
+#'
+#' @param R an xts, vector, matrix, data frame, timeseries , or zoo object of asset return
+#' @param geometric utilize geometric chaining(TRUE) or simple/arithmetic chaining
+#' @param weights weights for the portfolio
+#' 
+#' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-#' Outs and the ‘Triple Penance’ Rule(January 1, 2013)
+
+TriplePenace<-function(R,geometric = TRUE, weights = NULL,...)
 {
     x = checkData(R)
         columns = ncol(x)
@@ -15,20 +33,23 @@ TriplePenacle<-function(R,geometric = TRUE, weights = NULL,...)
  return(tp)
 
 }
-#get_cumul_return<-function(x,geometric){
-#   if(geometric)
-#      Return.cumulative = cumprod(1+x)
-#  else
-#      Return.cumulative = 1 + cumsum(x)
-#          return(Return.cumulative)
-#}
-get_minq<-function(R){
+get_minq<-function(R,confidence){
+
+    # DESCRIPTION:
+    # A function to get the maximum drawdown for first order serially autocorrelated
+    # returns from the quantile function defined for accumulated returns for a 
+    # particular confidence interval
+
+    # Inputs:
+    # R: The function takes Returns as the input.
+    #
+    # confidence: The confidence interval of the input.
+
     x = checkData(R)
     mu = mean(x[,column, na.rm = TRUE)
     sd = StdDev(x)
     phi = ar(x)$ar
     dp0 = x[1] 
-    confidence = 0.95
     q = 0
     bets = 0
     while(q < 0){
@@ -40,6 +61,24 @@ get_minq<-function(R){
 
 
 getQ<-function(bets,phi,mu,sigma,dp0,confidence){
+
+    # DESCRIPTION:
+    # A function to get the quantile function for cumulative returns
+    # and a  particular confidence interval.
+    
+    # Inputs:
+    # bets: The number fo steps
+    #
+    # phi: The coefficient for AR[1]
+    #
+    # mu: The mean of the returns
+    #
+    # sigma: The standard deviation of the returns
+    #
+    # dp0: The r0 or the first return
+    #
+    # confidence: The confidence level of the quantile function
+
     mean = ((phi^(bets+1)-phi)/(1-phi))*(dp0-mu)+mu*bets
     var = ((sigma/(phi-1))^2)*(((phi^(2*(bets+1))-1)/(phi^2-1))-2*((phi^(bets+1)-1)/(phi-1))+bets +1)
     q = mean + qnorm(confidence)*var^0.5
@@ -48,6 +87,16 @@ getQ<-function(bets,phi,mu,sigma,dp0,confidence){
 
 
 get_TuW<-function(R){
+
+    # DESCRIPTION:
+    # A function to generate the  time under water
+    #
+    # Inputs:
+    # R: The function takes Returns as the input.
+    #
+    # confidence: Confidence level of the quantile function
+
+
     x = checkData(R)
     mu = mean(x[,column, na.rm = TRUE)
     sd = StdDev(x)
@@ -68,6 +117,21 @@ diff<-function(bets,phi,mu,sigma,dp0,confidence){
 }
 
 golden_section<-function(R,a,b,minimum = TRUE,function_name,...){
+
+    # DESCRIPTION
+    # A function to perform the golden search algorithm on the provided function
+
+    # Inputs:
+    # R: Return series
+    #
+    # a: The starting point
+    #
+    # b: The end point
+    #
+    # minimum: If we want to calculate the minimum set minimum= TRUE(default)
+    #
+    # function_name: The name of the function 
+
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
