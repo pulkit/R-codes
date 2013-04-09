@@ -11,7 +11,7 @@ TriplePenacle<-function(R,geometric = TRUE, weights = NULL,...)
             column.TuW<-na.skip(x[,column],FUN = get_TuW,geometric  = geometric)
             tp[1,column] = column.MinQ
             tp[2,column] = column.TuW
- }
+         }  
  return(tp)
 
 }
@@ -34,8 +34,8 @@ get_minq<-function(R){
     while(q < 0){
         bets = bets + 1
         q = getQ(bets, phi, mu, sigma, dp0, confidence)
-    minQ = golden_section(x,0,bets)
-    return minQ
+    minQ = golden_section(x,0,bets,TRUE,getQ)
+    return(minQ[1])
 }
 
 
@@ -47,12 +47,28 @@ getQ<-function(bets,phi,mu,sigma,dp0,confidence){
 }
 
 
-get_TuW<-function(){
+get_TuW<-function(R){
+    x = checkData(R)
     mu = mean(x[,column, na.rm = TRUE)
     sd = StdDev(x)
     phi = ar(x)$ar
+    dp0 = x[1] 
+    confidence = 0.95
+    q = 0
+    bets = 0
+    while(q < 0){
+        bets = bets + 1
+        q = getQ(bets, phi, mu, sigma, dp0, confidence)
+    TuW = golden_section(x,0,bets,TRUE,diff)
+    return(TuW[2])
 }
-golden_section<-function(R,a,b,minimum = TRUE,...){
+
+diff<-function(bets,phi,mu,sigma,dp0,confidence){
+    return(abs(getQ(bets,phi,mu,sigma,dp0,confidence)))
+}
+
+golden_section<-function(R,a,b,minimum = TRUE,function_name,...){
+    FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
     if(minimum){
@@ -63,28 +79,28 @@ golden_section<-function(R,a,b,minimum = TRUE,...){
     c = 1.0 - r
     x1 = r*a + c*b
     x2 = c*a + r*b
-    f1 = sign * getQ(x1,phi,mu,sigma,dp0,confidence)
-    f2 = sign * getQ(x2,phi,mu,sigma,dp0,confidence)
+    f1 = sign * FUN(x1,phi,mu,sigma,dp0,confidence)
+    f2 = sign * FUN(x2,phi,mu,sigma,dp0,confidence)
     for(i in 1:N){
         if(f1>f2){
             a = x1
             x1 = x2
             f1 = f2
             x2 = c*a+r*b
-            f2 = sign*(x2,phi,mu,sigma,dp0,confidence)
+            f2 = sign*FUN(x2,phi,mu,sigma,dp0,confidence)
         }
         else{
             b = x2
             x2 = x1
             x1 = r*a + c*b
-            f1 = sign*(x1,phi,mu,sigma,dp0,confidence)
+            f1 = sign*FUN(x1,phi,mu,sigma,dp0,confidence)
     }
     }
     if(f1<f2){
-        return(sign*f1)
+        return(c(sign*f1,bets))
     }
     else{
-        return(sign*f2)
+        return(c(sign*f2,bets))
     }
 }   
         
