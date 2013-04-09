@@ -14,27 +14,27 @@
 #' @param geometric utilize geometric chaining(TRUE) or simple/arithmetic chaining
 #' @param weights weights for the portfolio
 #' 
-#' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-#' Outs and the ‘Triple Penance’ Rule(January 1, 2013)
+#' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-#' Outs and the ‘Triple Penance’ Rule(January 1, 2013).
 
-TriplePenace<-function(R,geometric = TRUE, weights = NULL,...)
+TriplePenace<-function(R,geometric = TRUE, weights = NULL,confidence,...)
 {
     x = checkData(R)
-        columns = ncol(x)
-        columnnames = colnames(x)
-        tp<-matrix(nrow = 2 ,ncol = columns)
-        tp$rownames<-c("MinQ","TuW")
-        tp$colnames <-columnnames
-        for(column in 1:columns){
-            column.MinQ<-na.skip(x[,column],FUN = get_minq,geometric = geometric)
-            column.TuW<-na.skip(x[,column],FUN = get_TuW,geometric  = geometric)
-            tp[1,column] = column.MinQ
-            tp[2,column] = column.TuW
-         }  
- return(tp)
-
+    columns = ncol(x)
+    columnnames = colnames(x)
+    tp = matrix(nrow = 2 ,ncol = columns)
+    i = 0 
+    for(i in 1:columns){
+        column_MinQ = get_minq(x[,i],confidence)
+        column_TuW = get_TuW(x[,i],confidence)
+        print(get_minq(x[,i]))
+        tp[1,i] = column_MinQ
+        print(tp[1,1])
+        tp[2,i] = column_TuW
+    }  
+    return(tp)
 }
 get_minq<-function(R,confidence){
-
+  
     # DESCRIPTION:
     # A function to get the maximum drawdown for first order serially autocorrelated
     # returns from the quantile function defined for accumulated returns for a 
@@ -44,18 +44,21 @@ get_minq<-function(R,confidence){
     # R: The function takes Returns as the input.
     #
     # confidence: The confidence interval of the input.
-
     x = checkData(R)
-    mu = mean(x[,column, na.rm = TRUE)
-    sd = StdDev(x)
-    phi = ar(x)$ar
+    mu = mean(x[,1], na.rm = TRUE)
+    sigma = StdDev(x)
+    phi = ar(x,order.max = 1)$ar
+    print(phi)
     dp0 = x[1] 
     q = 0
     bets = 0
-    while(q < 0){
+    print("aa")
+    while(q <= 0){
+        print("aa")
         bets = bets + 1
         q = getQ(bets, phi, mu, sigma, dp0, confidence)
-    minQ = golden_section(x,0,bets,TRUE,getQ)
+    }
+    minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
     return(minQ[1])
 }
 
@@ -98,8 +101,8 @@ get_TuW<-function(R){
 
 
     x = checkData(R)
-    mu = mean(x[,column, na.rm = TRUE)
-    sd = StdDev(x)
+    mu = mean(x[,1], na.rm = TRUE)
+    sigma = StdDev(x)
     phi = ar(x)$ar
     dp0 = x[1] 
     confidence = 0.95
@@ -108,7 +111,8 @@ get_TuW<-function(R){
     while(q < 0){
         bets = bets + 1
         q = getQ(bets, phi, mu, sigma, dp0, confidence)
-    TuW = golden_section(x,0,bets,TRUE,diff)
+    }
+    TuW = golden_section(x,0,bets,TRUE,diff,confidence)
     return(TuW[2])
 }
 
@@ -116,7 +120,7 @@ diff<-function(bets,phi,mu,sigma,dp0,confidence){
     return(abs(getQ(bets,phi,mu,sigma,dp0,confidence)))
 }
 
-golden_section<-function(R,a,b,minimum = TRUE,function_name,...){
+golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
 
     # DESCRIPTION
     # A function to perform the golden search algorithm on the provided function
@@ -131,7 +135,12 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,...){
     # minimum: If we want to calculate the minimum set minimum= TRUE(default)
     #
     # function_name: The name of the function 
-
+    x = checkData(R)
+    mu = mean(x[,1], na.rm = TRUE)
+    sigma = StdDev(x)
+    phi = ar(x,order.max = 1)$ar
+    dp0 = x[1]  
+    print(dp0)
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
@@ -145,8 +154,9 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,...){
     x2 = c*a + r*b
     f1 = sign * FUN(x1,phi,mu,sigma,dp0,confidence)
     f2 = sign * FUN(x2,phi,mu,sigma,dp0,confidence)
+    print(f1)
     for(i in 1:N){
-        if(f1>f2){
+        if(f1[1]>f2[1]){
             a = x1
             x1 = x2
             f1 = f2
@@ -167,11 +177,9 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,...){
         return(c(sign*f2,bets))
     }
 }   
-        
-
-
-
+      
 charts.TriplePenacle<-function(){
+
 }
 
 Table.TriplePenacle<-function(){
