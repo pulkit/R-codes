@@ -26,9 +26,7 @@ TriplePenace<-function(R,geometric = TRUE, weights = NULL,confidence,...)
     for(i in 1:columns){
         column_MinQ = get_minq(x[,i],confidence)
         column_TuW = get_TuW(x[,i],confidence)
-        print(get_minq(x[,i]))
         tp[1,i] = column_MinQ
-        print(tp[1,1])
         tp[2,i] = column_TuW
     }  
     return(tp)
@@ -41,25 +39,33 @@ get_minq<-function(R,confidence){
     # particular confidence interval
 
     # Inputs:
-    # R: The function takes Returns as the input.
+    # R: The function takes Returns as the input
     #
     # confidence: The confidence interval of the input.
     x = checkData(R)
     mu = mean(x[,1], na.rm = TRUE)
     sigma = StdDev(x)
     phi = ar(x,order.max = 1)$ar
-    print(phi)
-    dp0 = x[1] 
+    if(length(phi)==0){
+      warning("the value of phi should not be less than or equal to 0 setting to default value 0.5") 
+      phi = 0.5
+    }
+    else{
+        if(phi <= 0){
+        warning("the value of phi should not be less than or equal to 0 setting to default value 0.5")
+        phi = 0.5
+    }
+      }
+    dp0 = x[1]
     q = 0
     bets = 0
-    print("aa")
     while(q <= 0){
-        print("aa")
         bets = bets + 1
         q = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
-    return(minQ[1])
+  
+    return(minQ$minQ)
 }
 
 
@@ -89,7 +95,7 @@ getQ<-function(bets,phi,mu,sigma,dp0,confidence){
 }
 
 
-get_TuW<-function(R){
+get_TuW<-function(R,confidence){
 
     # DESCRIPTION:
     # A function to generate the  time under water
@@ -103,17 +109,26 @@ get_TuW<-function(R){
     x = checkData(R)
     mu = mean(x[,1], na.rm = TRUE)
     sigma = StdDev(x)
-    phi = ar(x)$ar
-    dp0 = x[1] 
-    confidence = 0.95
+    phi = ar(x,order.max=1)$ar
+    if(length(phi)==0){
+      warning("the value of phi should not be less than or equal to 0 setting to default value 0.5") 
+      phi = 0.5
+    }
+    else{
+      if(phi <= 0){
+        warning("the value of phi should not be less than or equal to 0 setting to default value 0.5")
+        phi = 0.5
+      }
+    }    
+    dp0 = x[1]
     q = 0
     bets = 0
-    while(q < 0){
+    while(q <= 0){
         bets = bets + 1
         q = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
-    TuW = golden_section(x,0,bets,TRUE,diff,confidence)
-    return(TuW[2])
+    TuW = golden_section(x,bets-1,bets,TRUE,diff,confidence)
+    return(TuW$TuW)
 }
 
 diff<-function(bets,phi,mu,sigma,dp0,confidence){
@@ -139,11 +154,21 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     mu = mean(x[,1], na.rm = TRUE)
     sigma = StdDev(x)
     phi = ar(x,order.max = 1)$ar
+    if(length(phi)==0){
+      warning("the value of phi should not be less than or equal to 0 setting to default value 0.5") 
+      phi = 0.5
+    }
+    else{
+      if(phi <= 0){
+        warning("the value of phi should not be less than or equal to 0 setting to default value 0.5")
+        phi = 0.5
+      }
+    }
     dp0 = x[1]  
-    print(dp0)
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
+
     if(minimum){
         sign = -1
     }
@@ -154,9 +179,8 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     x2 = c*a + r*b
     f1 = sign * FUN(x1,phi,mu,sigma,dp0,confidence)
     f2 = sign * FUN(x2,phi,mu,sigma,dp0,confidence)
-    print(f1)
     for(i in 1:N){
-        if(f1[1]>f2[1]){
+        if(f1>f2){
             a = x1
             x1 = x2
             f1 = f2
@@ -171,10 +195,10 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     }
     }
     if(f1<f2){
-        return(c(sign*f1,bets))
+        return(list(minQ=sign*f1,TuW=x1))
     }
     else{
-        return(c(sign*f2,bets))
+        return(list(minQ=sign*f2,TuW=x2))
     }
 }   
       
