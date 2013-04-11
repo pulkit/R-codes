@@ -46,7 +46,7 @@ get_minq<-function(R,confidence){
     delta = x - x[-1]
     mu = mean(delta, na.rm = TRUE)
     sigma = StdDev(delta)
-    phi = 
+    phi = cov(delta[-1],delta[-length(delta)])/(cov(delta[-length(delta)])^2)
          
     dp0 = x[1]
     q = 0
@@ -102,7 +102,7 @@ get_TuW<-function(R,confidence){
     delta = x - x[-1]
     mu = mean(delta, na.rm = TRUE)
     sigma = StdDev(delta)
-    phi = 
+    phi = cov(delta[-1],delta[-length(delta)])/(cov(delta[-length(delta)])^2)
     dp0 = delta[1]
     q = 0
     bets = 0
@@ -138,7 +138,7 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     delta = x - x[-1]
     mu = mean(delta, na.rm = TRUE)
     sigma = StdDev(delta)
-    phi = 
+    phi = cov(delta[-1],delta[-length(delta)])/(cov(delta[-length(delta)])^2)
     dp0 = delta[1]  
     FUN = match.fun(function_name)
     tol = 10^-9
