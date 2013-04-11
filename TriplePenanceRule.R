@@ -20,14 +20,14 @@ TriplePenace<-function(R,confidence,...)
     x = log(x)
     columns = ncol(x)
     columnnames = colnames(x)
-    tp = matrix(nrow = 2 ,ncol = columns)
+    tp = matrix(nrow = columns)
     i = 0 
     for(i in 1:columns){
         column_MinQ = get_minq(x[,i],confidence)
         column_TuW = get_TuW(x[,i],confidence)
-        tp[1,i] = column_MinQ
-        tp[2,i] = column_TuW
-    }  
+        tp[i,] = c(column_MinQ,column_TuW,column_MinQ[7]/column_TuW)
+    }
+    table.TriplePenance(R,tp)
     return(tp)
 }
 get_minq<-function(R,confidence){
@@ -57,7 +57,7 @@ get_minq<-function(R,confidence){
     }
     minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
   
-    return(minQ$minQ)
+    return(c(mu,sigma,phi,sigma/(1-phi),-minQ$minQ,minQ$t))
 }
 
 
@@ -111,7 +111,7 @@ get_TuW<-function(R,confidence){
         q = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     TuW = golden_section(x,bets-1,bets,TRUE,diff,confidence)
-    return(TuW$TuW)
+    return(TuW$t)
 }
 
 diff<-function(bets,phi,mu,sigma,dp0,confidence){
@@ -132,7 +132,8 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     #
     # minimum: If we want to calculate the minimum set minimum= TRUE(default)
     #
-    # function_name: The name of the function 
+    # function_name: The name of the function
+  
     x = checkData(R)
     x = log(x)
     delta = x - x[-1]
@@ -170,10 +171,10 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     }
     }
     if(f1<f2){
-        return(list(minQ=sign*f1,TuW=x1))
+        return(list(minQ=sign*f1,t=x1))
     }
     else{
-        return(list(minQ=sign*f2,TuW=x2))
+        return(list(minQ=sign*f2,t=x2))
     }
 }   
       
@@ -204,7 +205,23 @@ charts.TriplePenacle<-function(){
 
 }
 
-Table.TriplePenacle<-function(){
+table.TriplePenacle<-function(R,tp){
+  
+  # DESCRIPTION:
+  # Maximum Drawdown and Time under Water considering first-order serial correlation
+  # 
+  # Input:
+  # R NAV of the hedge fund
+  # 
+  # Output:
+  # Creates a drawdown for each hedge fund
+  #
+  # Function:
+  
+  result = data.frame(tp,row.names = colnames(R))
+  colnames(result) = c("mean","StDev","Phi","Sigma","MaxDD","t*","MaxTuW","Penance")
+  result
+  
 }
 
 
