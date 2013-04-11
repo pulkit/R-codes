@@ -10,15 +10,14 @@
 #' takes to produce it, with the same confidence level. The framework is
 #' generalized to deal with the case of first-order auto-correlated cashflows
 #'
-#' @param R an xts, vector, matrix, data frame, timeseries , or zoo object of asset return
-#' @param geometric utilize geometric chaining(TRUE) or simple/arithmetic chaining
-#' @param weights weights for the portfolio
+#' @param R an xts, vector, matrix, data frame, timeseries , or zoo object of NAVs
 #' 
 #' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-#' Outs and the ‘Triple Penance’ Rule(January 1, 2013).
 
-TriplePenace<-function(R,geometric = TRUE, weights = NULL,confidence,...)
+TriplePenace<-function(R,confidence,...)
 {
     x = checkData(R)
+    x = log(x)
     columns = ncol(x)
     columnnames = colnames(x)
     tp = matrix(nrow = 2 ,ncol = columns)
@@ -43,19 +42,12 @@ get_minq<-function(R,confidence){
     #
     # confidence: The confidence interval of the input.
     x = checkData(R)
-    mu = mean(x[,1], na.rm = TRUE)
-    sigma = StdDev(x)
-    phi = ar(x,order.max = 1)$ar
-    if(length(phi)==0){
-      warning("the value of phi should not be less than or equal to 0 setting to default value 0.5") 
-      phi = 0.5
-    }
-    else{
-        if(phi <= 0){
-        warning("the value of phi should not be less than or equal to 0 setting to default value 0.5")
-        phi = 0.5
-    }
-      }
+    x = log(x)
+    delta = x - x[-1]
+    mu = mean(delta, na.rm = TRUE)
+    sigma = StdDev(delta)
+    phi = 
+         
     dp0 = x[1]
     q = 0
     bets = 0
@@ -107,20 +99,11 @@ get_TuW<-function(R,confidence){
 
 
     x = checkData(R)
-    mu = mean(x[,1], na.rm = TRUE)
-    sigma = StdDev(x)
-    phi = ar(x,order.max=1)$ar
-    if(length(phi)==0){
-      warning("the value of phi should not be less than or equal to 0 setting to default value 0.5") 
-      phi = 0.5
-    }
-    else{
-      if(phi <= 0){
-        warning("the value of phi should not be less than or equal to 0 setting to default value 0.5")
-        phi = 0.5
-      }
-    }    
-    dp0 = x[1]
+    delta = x - x[-1]
+    mu = mean(delta, na.rm = TRUE)
+    sigma = StdDev(delta)
+    phi = 
+    dp0 = delta[1]
     q = 0
     bets = 0
     while(q <= 0){
@@ -151,20 +134,12 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     #
     # function_name: The name of the function 
     x = checkData(R)
-    mu = mean(x[,1], na.rm = TRUE)
-    sigma = StdDev(x)
-    phi = ar(x,order.max = 1)$ar
-    if(length(phi)==0){
-      warning("the value of phi should not be less than or equal to 0 setting to default value 0.5") 
-      phi = 0.5
-    }
-    else{
-      if(phi <= 0){
-        warning("the value of phi should not be less than or equal to 0 setting to default value 0.5")
-        phi = 0.5
-      }
-    }
-    dp0 = x[1]  
+    x = log(x)
+    delta = x - x[-1]
+    mu = mean(delta, na.rm = TRUE)
+    sigma = StdDev(delta)
+    phi = 
+    dp0 = delta[1]  
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
@@ -202,6 +177,29 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     }
 }   
       
+monte_simul<-function(size){
+    
+  phi = 0.5
+  mu = 1
+  sigma = 2 
+  dp0 = 1
+  bets = 25
+  confidence = 0.95
+  
+  q = getQ(bets, phi, mu, sigma, dp0, confidence)
+  ms = NULL
+  
+  for(i in 1:size){
+    ms[i] = sum((1-phi)*mu + rnorm(bets)*sigma + delta*phi)
+  }
+  q_ms = quantile(ms,(1-confidence)*100)
+  diff = q - q_ms 
+
+  print(q)
+  print(q_ms)
+  print(q - q_ms)
+}
+
 charts.TriplePenacle<-function(){
 
 }
