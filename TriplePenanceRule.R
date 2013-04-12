@@ -12,7 +12,7 @@
 #'
 #' @param R an xts, vector, matrix, data frame, timeseries , or zoo object of NAVs
 #' 
-#' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-#' Outs and the ‘Triple Penance’ Rule(January 1, 2013).
+#' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-Outs and the ‘Triple Penance’ Rule(January 1, 2013).
 
 TriplePenace<-function(R,confidence,...)
 {
