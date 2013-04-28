@@ -45,7 +45,6 @@ get_minq<-function(R,confidence){
     sigma_infinity = StdDev(x)
     phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
     sigma = sigma_infinity*((1-phi^2)^0.5)
-    sigma_infinity = 0.0264
     dp0 = 0
     q_value = 0
     bets = 0
@@ -76,9 +75,10 @@ getQ<-function(bets,phi,mu,sigma,dp0,confidence){
     # dp0: The r0 or the first return
     #
     # confidence: The confidence level of the quantile function
-    mean = ((phi^(bets+1)-phi)/(1-phi))*(dp0-mu)+mu*bets
-    var = ((sigma/(phi-1))^2)*(((phi^(2*(bets+1))-1)/(phi^2-1))-2*((phi^(bets+1)-1)/(phi-1))+bets +1)
-    q_value = mean + qnorm(1-confidence)*var^0.5
+    mu_new = (phi^(bets+1)-phi)/(1-phi)*(dp0-mu)+mu*bets
+    var = sigma^2/(phi-1)^2
+    var = var*((phi^(2*(bets+1))-1)/(phi^2-1)-2*(phi^(bets+1)-1)/(phi-1)+bets +1)
+    q_value = mu_new + qnorm(1-confidence)*(var^0.5)
     return(q_value)
 }
 
@@ -99,6 +99,7 @@ get_TuW<-function(R,confidence){
     sigma_infinity = StdDev(x)
     phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
     sigma = sigma_infinity*((1-phi^2)^0.5)
+    
     dp0 = 0
     q_value = 0
     bets = 0
@@ -135,12 +136,13 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     sigma_infinity = StdDev(x)
     phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
     sigma = sigma_infinity*((1-phi^2)^0.5)
+   
     dp0 = 0  
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
     
-    if(minimum){
+    if(!minimum){
         sign = -1
     }
     N = round(ceiling(-2.078087*log(tol/abs(b-a))))
