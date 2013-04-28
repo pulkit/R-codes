@@ -20,10 +20,11 @@ TriplePenace<-function(R,confidence,...)
     columns = ncol(x)
     i = 0 
     tp = data.frame()
+    d  = data.frame()
     for(i in 1:columns){
         column_MinQ <- get_minq(x[,i],confidence)
         column_TuW = get_TuW(x[,i],confidence)
-        tp <- c(column_MinQ,column_TuW,column_MinQ[5]/column_TuW)
+        tp <- rbind(tp,c(column_MinQ,column_TuW,column_MinQ[5]/column_TuW))
     }
     table.TriplePenance(R,tp)
     #return(tp)
@@ -42,7 +43,7 @@ get_minq<-function(R,confidence){
     x = checkData(R)
     mu = mean(x, na.rm = TRUE)
     sigma = StdDev(x)
-    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
          
     dp0 = x[1]
     q_value = 0
@@ -52,7 +53,7 @@ get_minq<-function(R,confidence){
         q_value = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
-  
+    print(phi)
     return(c(mu,sigma,phi,sigma/(1-phi),-minQ$minQ,minQ$t))
 }
 
@@ -210,17 +211,9 @@ table.TriplePenance<-function(R,tp){
   # Creates a drawdown for each hedge fund
   #
   # Function:
-  x = checkData(R)
-  mu = mean(x, na.rm = TRUE)
-  sigma = StdDev(x)
-  phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
-  dp0 = x[1]  
-  
-  tp<-
+  row.names(tp)<-colnames(R)
+  colnames(tp) = c("mean","stdDev","phi","sigma","MaxDD","t*","MaxTuW","Penance")
   print(tp)
-  #row.names(tp)<-colnames(R)
-  #colnames(tp) = c("MaxDD","MaxTuW","Penance","mean","stdDev","phi")
-  
   
 }
 
