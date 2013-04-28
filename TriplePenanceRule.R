@@ -45,7 +45,7 @@ get_minq<-function(R,confidence){
     sigma = StdDev(x)
     phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
          
-    dp0 = x[1]
+    dp0 = 0
     q_value = 0
     bets = 0
     while(q_value <= 0){
@@ -53,8 +53,7 @@ get_minq<-function(R,confidence){
         q_value = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
-    print(phi)
-    return(c(mu,sigma,phi,sigma/(1-phi),-minQ$minQ,minQ$t))
+    return(c(mu,sigma,phi,sigma/(1-phi),-minQ$minQ*100,minQ$t))
 }
 
 
@@ -76,10 +75,9 @@ getQ<-function(bets,phi,mu,sigma,dp0,confidence){
     # dp0: The r0 or the first return
     #
     # confidence: The confidence level of the quantile function
-
     mean = ((phi^(bets+1)-phi)/(1-phi))*(dp0-mu)+mu*bets
     var = ((sigma/(phi-1))^2)*(((phi^(2*(bets+1))-1)/(phi^2-1))-2*((phi^(bets+1)-1)/(phi-1))+bets +1)
-    q_value = mean + qnorm(confidence)*var^0.5
+    q_value = mean + qnorm(1-confidence)*var^0.5
     return(q_value)
 }
 
@@ -98,8 +96,8 @@ get_TuW<-function(R,confidence){
     x = checkData(R)
     mu = mean(x, na.rm = TRUE)
     sigma = StdDev(x)
-    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
-    dp0 = x[1]
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    dp0 = 0
     q_value = 0
     bets = 0
     while(q_value <= 0){
@@ -133,12 +131,12 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     x = checkData(R)
     mu = mean(x, na.rm = TRUE)
     sigma = StdDev(x)
-    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
-    dp0 = x[1]  
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    dp0 = 0  
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
-
+    
     if(minimum){
         sign = -1
     }
@@ -160,6 +158,7 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
         else{
             b = x2
             x2 = x1
+            f2 = f1
             x1 = r*a + c*b
             f1 = sign*FUN(x1,phi,mu,sigma,dp0,confidence)
     }
