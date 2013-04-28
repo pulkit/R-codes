@@ -10,14 +10,13 @@
 #' takes to produce it, with the same confidence level. The framework is
 #' generalized to deal with the case of first-order auto-correlated cashflows
 #'
-#' @param R an xts, vector, matrix, data frame, timeseries , or zoo object of NAVs
+#' @param R Hedge Fund Returns
 #' 
 #' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-Outs and the ‘Triple Penance’ Rule(January 1, 2013).
 
 TriplePenace<-function(R,confidence,...)
 {
     x = checkData(R)
-    x = log(x)
     columns = ncol(x)
     columnnames = colnames(x)
     tp = matrix(nrow = columns)
@@ -42,7 +41,6 @@ get_minq<-function(R,confidence){
     #
     # confidence: The confidence interval of the input.
     x = checkData(R)
-    x = log(x)
     delta = x - x[-1]
     mu = mean(delta, na.rm = TRUE)
     sigma = StdDev(delta)
