@@ -41,13 +41,11 @@ get_minq<-function(R,confidence){
     #
     # confidence: The confidence interval of the input.
     x = checkData(R)
-    #mu = mean(x, na.rm = TRUE)
-    #sigma = StdDev(x)
-    #phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
-
-    mu = 0.0055
-    sigma = 0.0158
-    phi = 0.3594
+    mu = mean(x, na.rm = TRUE)
+    sigma_infinity = StdDev(x)
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    sigma = sigma_infinity*((1-phi^2)^0.5)
+    sigma_infinity = 0.0264
     dp0 = 0
     q_value = 0
     bets = 0
@@ -56,7 +54,7 @@ get_minq<-function(R,confidence){
         q_value = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
-    return(c(mu,sigma,phi,sigma/(1-phi),-minQ$minQ*100,minQ$t))
+    return(c(mu,sigma_infinity,phi,sigma,-minQ$minQ*100,minQ$t))
 }
 
 
@@ -97,12 +95,10 @@ get_TuW<-function(R,confidence){
 
 
     x = checkData(R)
-    #mu = mean(x, na.rm = TRUE)
-    #sigma = StdDev(x)
-    #phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
-    mu = 0.0055
-    sigma = 0.0170
-    phi = 0.3594
+    mu = mean(x, na.rm = TRUE)
+    sigma_infinity = StdDev(x)
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    sigma = sigma_infinity*((1-phi^2)^0.5)
     dp0 = 0
     q_value = 0
     bets = 0
@@ -136,8 +132,9 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
   
     x = checkData(R)
     mu = mean(x, na.rm = TRUE)
-    sigma = StdDev(x)
+    sigma_infinity = StdDev(x)
     phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    sigma = sigma_infinity*((1-phi^2)^0.5)
     dp0 = 0  
     FUN = match.fun(function_name)
     tol = 10^-9
