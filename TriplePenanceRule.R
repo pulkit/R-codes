@@ -1,3 +1,5 @@
+library(PerformanceAnalytics)
+data(edhec)
 #' @title
 #' Triple Penance Rule
 #'
@@ -14,7 +16,7 @@
 #' 
 #' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-Outs and the ‘Triple Penance’ Rule(January 1, 2013).
 
-TriplePenace<-function(R,confidence,...)
+TriplePenance<-function(R,confidence,...)
 {
     x = checkData(R)
     columns = ncol(x)
@@ -199,28 +201,27 @@ monte_simul<-function(size){
   print(q_value - q_ms)
 }
 
-charts.TriplePenacle<-function(){
-
-}
-
 table.TriplePenance<-function(R,tp){
   
   # DESCRIPTION:
   # Maximum Drawdown and Time under Water considering first-order serial correlation
   # 
   # Input:
-  # R NAV of the hedge fund
+  # R log returns 
   # 
   # Output:
-  # Creates a drawdown for each hedge fund
+  # Creates a Table showing mean stdDev phi sigma MaxDD t* MaxTuW and Penance
   #
   # Function:
   row.names(tp)<-colnames(R)
-  colnames(tp) = c("mean","stdDev","phi","sigma","MaxDD","t*","MaxTuW","Penance")
+  colnames(tp) = c("mean","stdDev","phi","sigma","MaxDD(in %)","t*","MaxTuW","Penance")
   print(tp)
   
 }
 
+# plots a table similar to Table 3 in the paper Drawdown-Based Stop-outs and "The Triple Penance" Rule
+
+TriplePenance(edhec,0.95)
 
 
 
