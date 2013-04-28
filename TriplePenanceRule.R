@@ -18,16 +18,15 @@ TriplePenace<-function(R,confidence,...)
 {
     x = checkData(R)
     columns = ncol(x)
-    columnnames = colnames(x)
-    tp = matrix(nrow = columns)
     i = 0 
+    tp = data.frame()
     for(i in 1:columns){
-        column_MinQ = get_minq(x[,i],confidence)
+        column_MinQ <- get_minq(x[,i],confidence)
         column_TuW = get_TuW(x[,i],confidence)
-        tp[i,] = c(column_MinQ,column_TuW,column_MinQ[7]/column_TuW)
+        tp <- c(column_MinQ,column_TuW,column_MinQ[5]/column_TuW)
     }
     table.TriplePenance(R,tp)
-    return(tp)
+    #return(tp)
 }
 get_minq<-function(R,confidence){
   
@@ -41,17 +40,16 @@ get_minq<-function(R,confidence){
     #
     # confidence: The confidence interval of the input.
     x = checkData(R)
-    delta = x - x[-1]
-    mu = mean(delta, na.rm = TRUE)
-    sigma = StdDev(delta)
-    phi = cov(delta[-1],delta[-length(delta)])/(cov(delta[-length(delta)])^2)
+    mu = mean(x, na.rm = TRUE)
+    sigma = StdDev(x)
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
          
     dp0 = x[1]
-    q = 0
+    q_value = 0
     bets = 0
-    while(q <= 0){
+    while(q_value <= 0){
         bets = bets + 1
-        q = getQ(bets, phi, mu, sigma, dp0, confidence)
+        q_value = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     minQ = golden_section(x,0,bets,TRUE,getQ,confidence)
   
@@ -80,8 +78,8 @@ getQ<-function(bets,phi,mu,sigma,dp0,confidence){
 
     mean = ((phi^(bets+1)-phi)/(1-phi))*(dp0-mu)+mu*bets
     var = ((sigma/(phi-1))^2)*(((phi^(2*(bets+1))-1)/(phi^2-1))-2*((phi^(bets+1)-1)/(phi-1))+bets +1)
-    q = mean + qnorm(confidence)*var^0.5
-    return(q)
+    q_value = mean + qnorm(confidence)*var^0.5
+    return(q_value)
 }
 
 
@@ -97,16 +95,15 @@ get_TuW<-function(R,confidence){
 
 
     x = checkData(R)
-    delta = x - x[-1]
-    mu = mean(delta, na.rm = TRUE)
-    sigma = StdDev(delta)
-    phi = cov(delta[-1],delta[-length(delta)])/(cov(delta[-length(delta)])^2)
-    dp0 = delta[1]
-    q = 0
+    mu = mean(x, na.rm = TRUE)
+    sigma = StdDev(x)
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
+    dp0 = x[1]
+    q_value = 0
     bets = 0
-    while(q <= 0){
+    while(q_value <= 0){
         bets = bets + 1
-        q = getQ(bets, phi, mu, sigma, dp0, confidence)
+        q_value = getQ(bets, phi, mu, sigma, dp0, confidence)
     }
     TuW = golden_section(x,bets-1,bets,TRUE,diff,confidence)
     return(TuW$t)
@@ -133,12 +130,10 @@ golden_section<-function(R,a,b,minimum = TRUE,function_name,confidence,...){
     # function_name: The name of the function
   
     x = checkData(R)
-    x = log(x)
-    delta = x - x[-1]
-    mu = mean(delta, na.rm = TRUE)
-    sigma = StdDev(delta)
-    phi = cov(delta[-1],delta[-length(delta)])/(cov(delta[-length(delta)])^2)
-    dp0 = delta[1]  
+    mu = mean(x, na.rm = TRUE)
+    sigma = StdDev(x)
+    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
+    dp0 = x[1]  
     FUN = match.fun(function_name)
     tol = 10^-9
     sign = 1 
@@ -185,25 +180,25 @@ monte_simul<-function(size){
   bets = 25
   confidence = 0.95
   
-  q = getQ(bets, phi, mu, sigma, dp0, confidence)
+  q_value = getQ(bets, phi, mu, sigma, dp0, confidence)
   ms = NULL
   
   for(i in 1:size){
     ms[i] = sum((1-phi)*mu + rnorm(bets)*sigma + delta*phi)
   }
   q_ms = quantile(ms,(1-confidence)*100)
-  diff = q - q_ms 
+  diff = q_value - q_ms 
 
-  print(q)
+  print(q_value)
   print(q_ms)
-  print(q - q_ms)
+  print(q_value - q_ms)
 }
 
 charts.TriplePenacle<-function(){
 
 }
 
-table.TriplePenacle<-function(R,tp){
+table.TriplePenance<-function(R,tp){
   
   # DESCRIPTION:
   # Maximum Drawdown and Time under Water considering first-order serial correlation
@@ -215,10 +210,17 @@ table.TriplePenacle<-function(R,tp){
   # Creates a drawdown for each hedge fund
   #
   # Function:
+  x = checkData(R)
+  mu = mean(x, na.rm = TRUE)
+  sigma = StdDev(x)
+  phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)])^2)
+  dp0 = x[1]  
   
-  result = data.frame(tp,row.names = colnames(R))
-  colnames(result) = c("mean","StDev","Phi","Sigma","MaxDD","t*","MaxTuW","Penance")
-  result
+  tp<-
+  print(tp)
+  #row.names(tp)<-colnames(R)
+  #colnames(tp) = c("MaxDD","MaxTuW","Penance","mean","stdDev","phi")
+  
   
 }
 
