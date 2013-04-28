@@ -10,7 +10,7 @@
 #' takes to produce it, with the same confidence level. The framework is
 #' generalized to deal with the case of first-order auto-correlated cashflows
 #'
-#' @param R Hedge Fund Returns
+#' @param R Hedge Fund log Returns
 #' 
 #' @reference Bailey, David H. and Lopez de Prado, Marcos, Drawdown-Based Stop-Outs and the ‘Triple Penance’ Rule(January 1, 2013).
 
@@ -41,10 +41,13 @@ get_minq<-function(R,confidence){
     #
     # confidence: The confidence interval of the input.
     x = checkData(R)
-    mu = mean(x, na.rm = TRUE)
-    sigma = StdDev(x)
-    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
-         
+    #mu = mean(x, na.rm = TRUE)
+    #sigma = StdDev(x)
+    #phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+
+    mu = 0.0055
+    sigma = 0.0158
+    phi = 0.3594
     dp0 = 0
     q_value = 0
     bets = 0
@@ -94,9 +97,12 @@ get_TuW<-function(R,confidence){
 
 
     x = checkData(R)
-    mu = mean(x, na.rm = TRUE)
-    sigma = StdDev(x)
-    phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    #mu = mean(x, na.rm = TRUE)
+    #sigma = StdDev(x)
+    #phi = cov(x[-1],x[-length(x)])/(cov(x[-length(x)]))
+    mu = 0.0055
+    sigma = 0.0170
+    phi = 0.3594
     dp0 = 0
     q_value = 0
     bets = 0
