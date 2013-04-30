@@ -22,6 +22,13 @@ emaxdrawdown<-function(R,T){
   x = checkData(R)
   mu = mean(x)
   sigma = StdDev(x)
+
+  columns = ncol(x)
+  columnnames = colnames(x)
+
+  Edrawdown<-function(r){
+  mu =mean(r)
+  sigma = StdDev(r)
   gamma<-sqrt(pi/8)
   if(mu==0){
     Ed<-2*gamma*sigma*sqrt(T)
@@ -84,4 +91,18 @@ emaxdrawdown<-function(R,T){
     }
   }
   return(Ed)
+  }
+  for(column in 1:columns){
+      column.drawdown <-Edrawdown(x[,column])
+      if(column == 1)
+          drawdown = column.drawdown
+      else{
+          drawdown = c(drawdown,column.drawdown)
+      }
+  }
+  drawdown<-matrix(drawdown,nrow = 1)
+  colnames(drawdown) = columnnames
+  rownames(drawdown) = "StdDev"
+  drawdown = reclass(drawdown,x)
+  return(drawdown)
 }
