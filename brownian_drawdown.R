@@ -5,21 +5,23 @@
 #' of the maximum drawdown of brownian Motion for a given
 #'  drift (mu), standard deviation(sigma), and Time Horizon(T) 
 #'  of the Brownian Motion 
-#' @param mu drift of the brownian motion
-#' @param sigma Variance of the brownian motion
+#' @param R returns
 #' @param T Time horizon of the brownian motion
 #' @keywords maximum drawdown,brownian motion
 #' @examples 
-#' emaxdrawdown(mu = -0.5, sigma = 1, T = 1000)
-#' emaxdrawdown(mu =  0.0, sigma = 1, T = 1000)
-#' emaxdrawdown(mu =  0.5, sigma = 1, T = 1000)
+#' emaxdrawdown(R, T = 1000)
+#' emaxdrawdown(R, T = 1000)
+#' emaxdrawdown(R, T = 1000)
 #' @references  Magdon-Ismail M, A Atiya, A Pratap and Y Abu-Mostafa,
 #'     2004 On the maximum drawdown of a Brownian motion Journal of 
 #'     Applied Probability 41(1),March
 #'  
 
 
-emaxdrawdown<-function(mu,sigma,T){
+emaxdrawdown<-function(R,T){
+  x = checkData(R)
+  mu = mean(x)
+  sigma = StdDev(x)
   gamma<-sqrt(pi/8)
   if(mu==0){
     Ed<-2*gamma*sigma*sqrt(T)
