@@ -1,3 +1,4 @@
+library(PerformanceAnalytics)
 #'@title Probabilistic Sharpe Ratio
 #'@description
 #'Given a predefined
@@ -11,7 +12,7 @@
 #'@param weights the weights for the portfolio
 
 ProbSharpeRatio<-
-function(R, Rf = 0, refSR,p = 0.95, weights = NULL, ...){
+function(R, refSR,Rf=0,p = 0.95, weights = NULL, ...){
     x = checkData(R)
     columns = ncol(R)
     columnnames = colnames(R)
@@ -59,3 +60,5 @@ mintrl <- function(x,Rf,p,refSR,...){
     return(probsharpe)
 
 }
+data(edhec)
+ProbSharpeRatio(edhec,1/(12^0.5))
