@@ -1,47 +1,61 @@
 #'@title Probabilistic Sharpe Ratio
 #'@description
+#'Given a predefined
+#'benchmark4 Sharpe ratio (), the observed Sharpe  Ratiô can be expressed
+#' in probabilistic
 #'
-ProbSharpeRatio<-
-function(R, Rf = 0, p = 0.95, weights = NULL, annualize = FALSE, ...){
-    R = checkData(R)
+#'@param R the return series
+#'@param Rf the risk free rate of return
+#'@param refSR the reference Sharpe Ratio
+#'@param the confidence level
+#'@param weights the weights for the portfolio
 
+ProbSharpeRatio<-
+function(R, Rf = 0, refSR,p = 0.95, weights = NULL, ...){
+    x = checkData(R)
+    columns = ncol(R)
+    columnnames = colnames(R)
+    
     if(!is.null(dim(Rf)))
         Rf = checkData(Rf)
-
-    if(annualize){
-        freq = periodicity(R)
-        switch(freq$scale,
-            minute = {stop("Data periodicity too high")},
-            hourly = {stop("Data periodicity too high")},
-            daily = {scale = 252},
-            weekly = {scale = 52},
-            monthly = {scale = 12},
-            quarterly = {scale = 4},
-            yearly = {scale = 1}
-            )
-    }
-    else{
-        scale = 1
-    }
-
-    psr <- function (R,Rf,p,refSR,...){
-        x = checkData(R)
-        sr = srm(x, Rf, p,"StdDev")
+    
+    psr <- function (x,Rf,p,refSR,...){
+        sr = SharpeRatio(x, Rf, p,"StdDev")
         n = nrow(x)
         sd = StdDev(x)
         sk = skewness(x)
         kr = kurtosis(x)
         PSR = pnorm(((sr - refSR)*(n-1)^(0.5))/(1-sr*sk+sr^2*(kr-1)/4)^(0.5))
-        PSR
+        return(PSR)
 }
 
-mintrl <- function(R,Rf,p,refSR,...){
-    sk = skewness(R)
-    kr =kurtosis(R)
-    sr = srm(R, Rf, p, "StdDev")
+mintrl <- function(x,Rf,p,refSR,...){
+    sk = skewness(x)
+    kr =kurtosis(x)
+    sr = SharpeRatio(x, Rf, p, "StdDev")
     MinTRL = 1 + (1 - sk*sr + ((kr-1)/4)*sr^2)*(qnorm(p)/(sr-refSR))^2
-    MinTRL
+    return(MinTRL)
 
 }
+    for(column in 1:columns){
+      column.probsharpe <- psr(x[,column],Rf,p,refSR)
+      column.mintrack <- mintrl(x[,column],Rf,p,refSR)
+      if(column == 1){
+        probsharpe = column.probsharpe
+        mintrack = column.mintrack
+      }
+      else {
+        probsharpe = merge(probsharpe, column.probsharpe)
+        mintrack = merge(mintrack, column.mintrack)
+    }
+      
+    }
+    
+    probsharpe = rbind(probsharpe,mintrack)
+    
+    colnames(probsharpe) = columnnames
+    probsharpe = reclass(probsharpe, x)
+    rownames(probsharpe)=c("PSR","MinTRL")
+    return(probsharpe)
 
 }
