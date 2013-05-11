@@ -16,7 +16,7 @@
 #'@references Yang, Z. George and Zhong, Liang, Optimal Portfolio Strategy to 
 #'Control Maximum Drawdown - The Case of Risk Based Dynamic Asset Allocation (February 25, 2012)
 #' @export
-rollDrawdown<-function(R, geometric = TRUE, weights = NULL, rf, h,...)
+rollDrawdown<-function(R,Rf,h, geometric = TRUE, weights = NULL,...)
 {
   
   # DESCRIPTION:
