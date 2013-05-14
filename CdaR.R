@@ -1,7 +1,7 @@
 CDD<-function (R, weights = NULL, geometric = TRUE, invert = TRUE, 
           p = 0.95, ...) 
 {
-  p = .setalphaprob(p)
+  #p = .setalphaprob(p)
   if (is.vector(R) || ncol(R) == 1) {
     R = na.omit(R)
     nr = nrow(R)
@@ -11,13 +11,34 @@ CDD<-function (R, weights = NULL, geometric = TRUE, invert = TRUE,
     drawdowns = drawdowns(order(drawdowns),decreasing = TRUE)
     # average of the drawdowns greater the (1-alpha).100% largest drawdowns 
     result = (1/((1-p)*nr(R)))*sum(drawdowns[((1-p)*nr):nr])
+    }
     else{
-      #linear programming problem  has to be solved to calculate the CDaR
+      f.obj = c(rep(0,nr),rep((1/(1-alpha))*(1/nr),nr),1)
+
+      f.con = cbind(-diag(nr),diag(nr),1)
+      f.dir = c(rep(">=",nr))
+      f.rhs = c(rep(0,nr))
+      
+      ut = diag(nr)
+      ut[-1,-nr] = ut[-1,-nr] - diag(nr - 1)
+      f.con = rbind(f.con,cbind(ut,matrix(0,nr,nr),1))
+      f.dir = c(rep(">=",nr))
+      f.rhs = c(f.rhs,-R)
+      
+      f.con = rbind(f.con,cbind(matrix(0,nr,nr),diag(nr),1))
+      f.dir = c(rep(">=",nr))
+      f.rhs = c(f.rhs,rep(0,nr))
+      
+      f.con = rbind(f.con,cbind(diag(nr),matrix(0,nr,nr),1))
+      f.dir = c(rep(">=",nr))
+      f.rhs = c(f.rhs,rep(0,nr))
+      
+      val = lp("min",f.obj,f.con,f.dir,f.rhs)
+      result = val$objval
     }
     if (invert) 
       result <- -result
 
-    }  
     return(result)
   }
   else {
